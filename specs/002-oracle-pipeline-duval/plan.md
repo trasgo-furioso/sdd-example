@@ -211,17 +211,6 @@ Top bar: app title left, IPNS health indicator + last run time right.
 │  │  Geo/Coords   │ 47,800   │ Aug 20, 10:00    │ ● Healthy    ││
 │  └──────────────────────────────────────────────────────────────┘│
 │                                                                 │
-│  ┌── Recent Pipeline Runs (last 5) ───────────────────────────┐│
-│  │  Run    │ Timestamp        │ New  │ Updated │ Status        ││
-│  │  ───────┼──────────────────┼──────┼─────────┼────────       ││
-│  │  #005   │ Aug 20, 14:30    │ 142  │ 38      │ ● Success    ││
-│  │  #004   │ Aug 20, 10:15    │ 87   │ 12      │ ● Success    ││
-│  │  #003   │ Aug 19, 22:00    │ 0    │ 5       │ ● Success    ││
-│  │  #002   │ Aug 19, 14:30    │ 1204 │ 340     │ ◐ Partial    ││
-│  │  #001   │ Aug 18, 09:00    │ 243k │ 0       │ ● Success    ││
-│  │                                                [View All →] ││
-│  └──────────────────────────────────────────────────────────────┘│
-│                                                                 │
 │  ┌── Elephant IPFS & MCP ──────────────────────────────────────┐│
 │  │  Open Data IPNS:   k51qzi...8f  ● Live   [Gateway ↗]      ││
 │  │  Query Table IPNS: k51qzi...3a  ● Live   [Gateway ↗]      ││
