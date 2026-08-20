@@ -174,11 +174,6 @@ Note: Leaflet + OpenStreetMap map view is deferred to R2 (CRM). The pipeline dem
 │  │  Agent │  │                                                         │
 │  │  Chat  │  │                                                         │
 │  └────────┘  │                                                         │
-│  ┌────────┐  │                                                         │
-│  │  IPFS  │  │                                                         │
-│  │  Arti- │  │                                                         │
-│  │  facts │  │                                                         │
-│  └────────┘  │                                                         │
 │              │                                                         │
 │  ──────────  │                                                         │
 │  Duval, FL   │                                                         │
@@ -225,6 +220,12 @@ Top bar: app title left, IPNS health indicator + last run time right.
 │  │  #002   │ Aug 19, 14:30    │ 1204 │ 340     │ ◐ Partial    ││
 │  │  #001   │ Aug 18, 09:00    │ 243k │ 0       │ ● Success    ││
 │  │                                                [View All →] ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  ┌── Elephant IPFS & MCP ──────────────────────────────────────┐│
+│  │  Open Data IPNS:   k51qzi...8f  ● Live   [Gateway ↗]      ││
+│  │  Query Table IPNS: k51qzi...3a  ● Live   [Gateway ↗]      ││
+│  │  MCP Endpoint:     https://<host>/mcp     ● Connected      ││
 │  └──────────────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -374,61 +375,12 @@ Clicking any row opens the property detail drawer with full attributes and sourc
 
 Agent responses show: answer text, result cards with source provenance, the DuckDB query executed, and data freshness.
 
-### Page 5: IPFS Artifacts
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  IPFS Artifacts                                                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌── IPNS Pointers (Live) ─────────────────────────────────────┐│
-│  │                                                             ││
-│  │  Open Data    oracle-open-data-duval                        ││
-│  │  IPNS Key:    k51qzi5uqu5d...8f         ● Resolving        ││
-│  │  Current CID: bafybeig...7x2a           [Open in Gateway ↗]││
-│  │  Properties:  245,012                                       ││
-│  │  Published:   Aug 20, 14:31                                 ││
-│  │                                                             ││
-│  │  Query Table  oracle-query-table-duval                      ││
-│  │  IPNS Key:    k51qzi5uqu5d...3a         ● Resolving        ││
-│  │  Current CID: bafybeif...9b1c           [Open in Gateway ↗]││
-│  │  Format:      Parquet (DuckDB-ready)                        ││
-│  │  Published:   Aug 20, 14:32                                 ││
-│  │                                                             ││
-│  └─────────────────────────────────────────────────────────────┘│
-│                                                                 │
-│  ┌── MCP Status ───────────────────────────────────────────────┐│
-│  │                                                             ││
-│  │  Endpoint:    https://<host>/mcp          ● Connected       ││
-│  │  Tools:       listOracleProperties, queryProperties,        ││
-│  │               getOracleProperty, getPropertyQuerySchema     ││
-│  │  Config:      ORACLE_OPEN_DATA_IPNS_MAP={"duval":"k51..."}  ││
-│  │                                          [Test Query ▶]     ││
-│  └─────────────────────────────────────────────────────────────┘│
-│                                                                 │
-│  ┌── Publish History ──────────────────────────────────────────┐│
-│  │                                                             ││
-│  │  Run   │ Published       │ CID            │ Delta           ││
-│  │  ──────┼─────────────────┼────────────────┼──────────────── ││
-│  │  #005  │ Aug 20, 14:31   │ bafybeig...7x2 │ +142 ~38 -0    ││
-│  │  #004  │ Aug 20, 10:16   │ bafybeig...4a1 │ +87  ~12 -0    ││
-│  │  #003  │ Aug 19, 22:01   │ bafybeif...c3e │ +0   ~5  -0    ││
-│  │  #002  │ Aug 19, 14:31   │ bafybeif...8d2 │ +1204 ~340 -2  ││
-│  │  #001  │ Aug 18, 09:02   │ bafybeig...1f0 │ +243k ~0  -0   ││
-│  │                                                             ││
-│  │  All CIDs are CIDv1 (raw codec, SHA-256)                   ││
-│  │  All artifacts follow Elephant/Lexicon conventions          ││
-│  └─────────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────┘
-```
-
 ### Demo Flow (maps to stakeholder transcript)
 
-1. **Dashboard** → show overview, total records, records by source, source health
-2. **Pipeline Runs** → show run history with deltas, expand a run to show source details and limitations
+1. **Dashboard** → show overview, total records, records by source, source health, IPFS/MCP status
+2. **Pipeline Runs** → show run history with deltas, expand a run to show source details, CID, webhook, limitations
 3. **Property Search** → run all 6 query types one at a time, click a result to show provenance in detail drawer
 4. **Agent Chat** → ask 3 agent prompts, show source-backed evidence with query transparency
-5. **IPFS Artifacts** → show live IPNS pointers, CIDs, MCP status, publish history with deltas
 
 ## Project Structure
 
@@ -494,8 +446,7 @@ oracle-property-intelligence-platform-pipeline-duval-fl/
 │   │   │   ├── dashboard.tsx
 │   │   │   ├── pipeline-runs.tsx
 │   │   │   ├── property-search.tsx
-│   │   │   ├── agent-chat.tsx
-│   │   │   └── ipfs-artifacts.tsx
+│   │   │   └── agent-chat.tsx
 │   │   └── services/
 │   └── tests/
 ├── agent/                    # Natural-language agent
