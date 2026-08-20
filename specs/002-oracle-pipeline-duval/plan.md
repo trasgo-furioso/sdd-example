@@ -363,6 +363,42 @@ Clicking any row opens the property detail drawer with full attributes and sourc
 
 Agent responses show: answer text, result cards with source provenance, the DuckDB query executed, and data freshness.
 
+### Validation Strategy
+
+**No custom Playwright e2e tests.** Use Slowking (from soofi-xyz-team-kit) as the e2e validation tool — the same agent that will perform the final evaluation.
+
+**Self-assessment loop**:
+```
+Build → Deploy → Smoke test → Run Slowking → Fix gaps → Redeploy → Re-run
+```
+
+**Smoke test** (pre-Slowking, fast check that endpoints are up):
+```
+scripts/smoke-test.sh
+├── curl deployed frontend URL → expect 200
+├── curl /api/health → expect 200 with record count
+├── curl /mcp (POST listOracleProperties) → expect JSON response
+└── exit 0 if all pass, exit 1 if any fail
+```
+
+**Slowking self-assessment** (3-pillar evaluation against our deployed runtime):
+1. `evaluate-candidate-intent` — validates we can articulate the business intent
+2. `evaluate-candidate-product` — exercises deployed runtime with Playwright, scores functional outcome
+3. `evaluate-candidate-implementation` — reviews code quality and kit usage
+
+**Inputs to Slowking**:
+- Assignment repo: `oracle-property-intelligence-platform-pipeline-duval-fl`
+- Deployed runtime URL: `https://<ec2-domain>`
+- Credentials: as configured
+- Demo artifact: recorded video walkthrough
+- PR: feature branch against assignment repo
+
+**Why this approach**:
+- Slowking IS the final evaluator — same scoring, no surprises
+- No custom test code to maintain
+- Using the kit's evaluation agent proves kit conformance (5 pts)
+- Iterative — fix gaps Slowking identifies, redeploy, re-run until score is acceptable
+
 ### Demo Flow (maps to stakeholder transcript)
 
 1. **Dashboard** → show overview, total records, records by source, source health, IPFS/MCP status
@@ -396,7 +432,7 @@ Two separate git repos with distinct commit responsibilities:
 
 **Root repo** (`/Users/trasgofurioso/Code/elephant/`):
 - Spec-driven workflow artifacts (specs/, .specify/)
-- E2E tests that validate the delivery repo
+- Slowking self-assessment results and smoke scripts
 - Orchestrator commits here
 
 **Delivery repo** (`oracle-property-intelligence-platform-pipeline-duval-fl/`):
