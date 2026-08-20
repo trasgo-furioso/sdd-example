@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-20
 
-**Status**: Draft
+**Status**: Planning
 
 **Input**: Parent integration spec defining the contract between the Oracle Property Intelligence Pipeline and the Residential Acquisition CRM. Each system will have its own spec-of-specs; this spec governs the integration user journeys and the data contract between them.
 
