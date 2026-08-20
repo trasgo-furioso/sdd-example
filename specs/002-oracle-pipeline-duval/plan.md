@@ -134,7 +134,7 @@ infra/lib/
 
 ## UX Architecture
 
-**Stack**: Vite + React + Shadcn/ui + Tailwind CSS + TanStack Table + Recharts + Vercel AI SDK `useChat`
+**Stack**: Vite + React + Shadcn/ui + Tailwind CSS + TanStack Table + Vercel AI SDK `useChat`
 
 ### Technology Choices
 
@@ -144,7 +144,6 @@ infra/lib/
 | Components | Shadcn/ui | Copy-paste components (no runtime dependency), Tailwind-native, accessible, professional |
 | Styling | Tailwind CSS | Golden Path compatible, pairs with Shadcn, rapid iteration |
 | Data tables | TanStack Table | Headless, Shadcn-compatible, handles 100k+ rows with virtualization |
-| Charts | Recharts | React-native, simple API, good for run deltas and record count visualization |
 | Agent chat | Vercel AI SDK `useChat` | Golden Path mandated for LLM UIs, handles streaming and tool calls |
 
 Note: Leaflet + OpenStreetMap map view is deferred to R2 (CRM). The pipeline demo does not require a map.
@@ -206,21 +205,18 @@ Top bar: app title left, IPNS health indicator + last run time right.
 │  │   +142 new   │ │ +142 / ~38   │ │ CID: bafy... │ │ healthy│ │
 │  └──────────────┘ └──────────────┘ └──────────────┘ └────────┘ │
 │                                                                 │
-│  ┌────────────────────────────────┐ ┌──────────────────────────┐│
-│  │ Records Over Time (Recharts)  │ │ Records by Source        ││
-│  │                               │ │                          ││
-│  │   250k ┤          ___/        │ │  Appraiser   ████████ 85k││
-│  │   200k ┤       __/           │ │  Permits     ██████   62k││
-│  │   150k ┤    __/              │ │  Ownership   █████    48k││
-│  │   100k ┤  _/                 │ │  Business    ███      28k││
-│  │    50k ┤_/                   │ │  Contractor  ██       15k││
-│  │        └──────────────       │ │  Geo/Coords  █████    47k││
-│  │         Run 1  2  3  4  5    │ │                          ││
-│  └────────────────────────────────┘ └──────────────────────────┘│
+│  ┌── Records by Source ────────────────────────────────────────┐│
+│  │  Source       │ Records  │ Last Collected   │ Status        ││
+│  │  ─────────────┼──────────┼──────────────────┼────────────── ││
+│  │  Appraiser    │ 85,210   │ Aug 20, 10:00    │ ● Healthy    ││
+│  │  Permits      │ 62,400   │ Aug 20, 10:05    │ ● Healthy    ││
+│  │  Ownership    │ 48,100   │ Aug 19, 22:00    │ ● Healthy    ││
+│  │  Business     │ 28,300   │ Aug 20, 10:02    │ ● Healthy    ││
+│  │  Contractor   │ 15,200   │ Aug 20, 10:10    │ ⚠ Slow       ││
+│  │  Geo/Coords   │ 47,800   │ Aug 20, 10:00    │ ● Healthy    ││
+│  └──────────────────────────────────────────────────────────────┘│
 │                                                                 │
-│  ┌──────────────────────────────────────────────────────────────┐│
-│  │ Recent Pipeline Runs (last 5)                               ││
-│  │                                                             ││
+│  ┌── Recent Pipeline Runs (last 5) ───────────────────────────┐│
 │  │  Run    │ Timestamp        │ New  │ Updated │ Status        ││
 │  │  ───────┼──────────────────┼──────┼─────────┼────────       ││
 │  │  #005   │ Aug 20, 14:30    │ 142  │ 38      │ ● Success    ││
