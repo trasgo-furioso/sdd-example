@@ -391,10 +391,26 @@ specs/002-oracle-pipeline-duval/
 └── tasks.md             # Phase 2 output (/speckit-tasks)
 ```
 
-### Source Code (repository root)
+### Repository & Commit Strategy
+
+Two separate git repos with distinct commit responsibilities:
+
+**Root repo** (`/Users/trasgofurioso/Code/elephant/`):
+- Spec-driven workflow artifacts (specs/, .specify/)
+- E2E tests that validate the delivery repo
+- Orchestrator commits here
+
+**Delivery repo** (`oracle-property-intelligence-platform-pipeline-duval-fl/`):
+- Git clone of the designated assignment repo
+- ALL implementation code lives here
+- Implementation agents MUST `cd oracle-property-intelligence-platform-pipeline-duval-fl` before working
+- Implementation agents commit directly to this repo
+- This is the repo submitted as PR for Slowking evaluation
+
+### Source Code (delivery repo)
 
 ```text
-oracle-property-intelligence-platform-pipeline-duval-fl/
+oracle-property-intelligence-platform-pipeline-duval-fl/        ← separate git repo
 ├── infra/                    # CDK infrastructure
 │   ├── bin/
 │   └── lib/
