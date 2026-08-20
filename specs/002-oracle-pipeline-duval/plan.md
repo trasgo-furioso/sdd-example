@@ -274,37 +274,48 @@ Expandable rows: click ▶ to expand run details (sources, artifact, webhook, li
 ┌─────────────────────────────────────────────────────────────────┐
 │  Property Search                                                │
 │                                                                 │
-│  [Search by Filters]  [Browse by Source]           ← tab bar    │
+│  [Query]  [Browse by Source]                       ← tab bar    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  ┌── Filter Bar ───────────────────────────────────────────────┐│
-│  │ Roof Age:  [> 15 yrs ▼]   Ownership:  [> 10 yrs ▼]        ││
-│  │ Water:     [☐ Near water]  Owner Type: [☐ Regional]         ││
-│  │ Transit:   [☐ Walking dist] Starbucks: [☐ Walking dist]    ││
-│  │ Free text: [________________________]     [Search 🔍]       ││
-│  └─────────────────────────────────────────────────────────────┘│
+│  ┌── Query Selector ──────────────────────────────────────────┐│
+│  │ [ Roofs older than 15 years                            ▼]  ││
+│  │                                                            ││
+│  │   Roofs older than 15 years                                ││
+│  │   View of water                                            ││
+│  │   No ownership change in 10+ years                         ││
+│  │   Regional owners                                          ││
+│  │   Walking distance to public transit                       ││
+│  │   Walking distance to Starbucks                            ││
+│  └────────────────────────────────────────────────────────────┘│
 │                                                                 │
-│  245 results                                    [Export CSV ↓]  │
+│  8,412 results                                  [Export CSV ↓]  │
 │  ┌──────────────────────────────────────────────────────────────┐│
-│  │ Parcel ID  │ Address          │ Value   │ Roof │ Own. │ Src ││
-│  │ ───────────┼──────────────────┼─────────┼──────┼──────┼──── ││
-│  │ RE0001234  │ 123 Main St      │ $185k   │ 18yr │ 12yr │ 3  ││
-│  │ RE0005678  │ 456 Oak Ave      │ $220k   │ 22yr │ 15yr │ 2  ││
-│  │ RE0009012  │ 789 Pine Rd      │ $142k   │ 16yr │ 8yr  │ 4  ││
-│  │ RE0003456  │ 321 Elm Blvd     │ $310k   │ 20yr │ 20yr │ 3  ││
+│  │ Parcel ID  │ Address          │ Value   │ Signal  │ Sources ││
+│  │ ───────────┼──────────────────┼─────────┼─────────┼──────── ││
+│  │ RE0001234  │ 123 Main St      │ $185k   │ 18 yrs  │ 3      ││
+│  │ RE0005678  │ 456 Oak Ave      │ $220k   │ 22 yrs  │ 2      ││
+│  │ RE0009012  │ 789 Pine Rd      │ $142k   │ 16 yrs  │ 4      ││
+│  │ RE0003456  │ 321 Elm Blvd     │ $310k   │ 20 yrs  │ 3      ││
 │  │ ...                                                         ││
 │  └──────────────────────────────────────────────────────────────┘│
 │                                                                 │
-│  ┌── Property Detail Drawer (slide-in from right) ────────────┐ │
+│  "Signal" column adapts to selected query:                      │
+│    Roof query     → roof age in years                           │
+│    Water query    → distance to water in ft                     │
+│    Ownership      → years since last transfer                   │
+│    Regional       → owner location (e.g., "Miami, FL")          │
+│    Transit        → distance to nearest stop in mi              │
+│    Starbucks      → distance to nearest location in mi          │
+│                                                                 │
+│  ┌── Property Detail Drawer (click any row) ──────────────────┐ │
 │  │                                                    [✕]     │ │
 │  │  RE0001234 — 123 Main St, Jacksonville, FL 32202           │ │
 │  │                                                            │ │
-│  │  Assessed Value: $185,000    Market Value: $195,000        │ │
-│  │  Year Built: 2008            Sqft: 1,800                   │ │
+│  │  Assessed Value: $185,000    Year Built: 2008              │ │
+│  │  Sqft: 1,800                 Owner: Smith, John            │ │
 │  │  Roof Age: 18 years          Last Sale: 2012-03-15         │ │
-│  │  Owner: Smith, John          Regional: No (local)          │ │
-│  │  Water Proximity: 1,200 ft   Transit: 0.3 mi ● walking    │ │
-│  │  Starbucks: 0.8 mi           Coordinates: 30.33, -81.65   │ │
+│  │  Water: 1,200 ft             Transit: 0.3 mi               │ │
+│  │  Starbucks: 0.8 mi           Regional: No (local)          │ │
 │  │                                                            │ │
 │  │  ── Source Provenance ──────────────────────────────────    │ │
 │  │  ● duval-appraiser   collected Aug 20, 10:00   Run #005   │ │
@@ -315,18 +326,19 @@ Expandable rows: click ▶ to expand run details (sources, artifact, webhook, li
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Browse by Source tab**:
+**Browse by Source tab** (for "show records by source" demo step):
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  Property Search                                                │
 │                                                                 │
-│  [Search by Filters]  [Browse by Source]           ← tab bar    │
+│  [Query]  [Browse by Source]                       ← tab bar    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌── Source Selector ──────────────────────────────────────────┐│
-│  │ [All Sources ▼]  Showing: duval-appraiser (85,210 records) ││
-│  └─────────────────────────────────────────────────────────────┘│
+│  │ [ duval-appraiser                                      ▼]  ││
+│  │  Showing 85,210 records                                    ││
+│  └────────────────────────────────────────────────────────────┘│
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────────────┐│
 │  │ Parcel ID  │ Address          │ Value   │ Collected  │ Run  ││
