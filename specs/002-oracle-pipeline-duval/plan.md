@@ -274,7 +274,6 @@ Expandable rows: click ▶ to expand run details (sources, artifact, webhook, li
 ┌─────────────────────────────────────────────────────────────────┐
 │  Property Search                                                │
 │                                                                 │
-│  [Query]  [Browse by Source]                       ← tab bar    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌── Query Selector ──────────────────────────────────────────┐│
@@ -326,34 +325,7 @@ Expandable rows: click ▶ to expand run details (sources, artifact, webhook, li
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Browse by Source tab** (for "show records by source" demo step):
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Property Search                                                │
-│                                                                 │
-│  [Query]  [Browse by Source]                       ← tab bar    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌── Source Selector ──────────────────────────────────────────┐│
-│  │ [ duval-appraiser                                      ▼]  ││
-│  │  Showing 85,210 records                                    ││
-│  └────────────────────────────────────────────────────────────┘│
-│                                                                 │
-│  ┌──────────────────────────────────────────────────────────────┐│
-│  │ Parcel ID  │ Address          │ Value   │ Collected  │ Run  ││
-│  │ ───────────┼──────────────────┼─────────┼────────────┼───── ││
-│  │ RE0001234  │ 123 Main St      │ $185k   │ Aug 20     │ #005 ││
-│  │ RE0005678  │ 456 Oak Ave      │ $220k   │ Aug 20     │ #005 ││
-│  │ RE0009012  │ 789 Pine Rd      │ $142k   │ Aug 19     │ #003 ││
-│  │ ...                                                         ││
-│  └──────────────────────────────────────────────────────────────┘│
-│                                                                 │
-│  Page 1 of 852                                     [1] [2] [>]  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-Clicking a row opens the same property detail drawer.
+Clicking any row opens the property detail drawer with full attributes and source provenance.
 
 ### Page 4: Agent Chat
 
@@ -452,12 +424,11 @@ Agent responses show: answer text, result cards with source provenance, the Duck
 
 ### Demo Flow (maps to stakeholder transcript)
 
-1. **Dashboard** → show overview, total records, source health
+1. **Dashboard** → show overview, total records, records by source, source health
 2. **Pipeline Runs** → show run history with deltas, expand a run to show source details and limitations
-3. **Property Search** → run all 6 query types, click a result to show provenance in detail drawer
-4. **Property Search** → "Browse by Source" tab, show records by source with collection timestamps
-5. **Agent Chat** → ask 3 agent prompts, show source-backed evidence with query transparency
-6. **IPFS Artifacts** → show live IPNS pointers, CIDs, MCP status, publish history with deltas
+3. **Property Search** → run all 6 query types one at a time, click a result to show provenance in detail drawer
+4. **Agent Chat** → ask 3 agent prompts, show source-backed evidence with query transparency
+5. **IPFS Artifacts** → show live IPNS pointers, CIDs, MCP status, publish history with deltas
 
 ## Project Structure
 
