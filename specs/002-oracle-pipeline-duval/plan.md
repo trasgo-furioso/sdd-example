@@ -132,6 +132,62 @@ infra/lib/
 - **Restate state**: EBS volume mounted at `/data/restate`, durable workflow journals persist
 - **Pipeline artifacts**: Local staging on EBS at `/data/pipeline`, published to Filebase IPFS
 
+## UX Architecture
+
+**Stack**: Vite + React + Shadcn/ui + Tailwind CSS + Leaflet + TanStack Table + Recharts + Vercel AI SDK `useChat`
+
+### Technology Choices
+
+| Layer | Choice | Rationale |
+|-------|--------|-----------|
+| Build | Vite + React | Amplify-compatible static SPA, TypeScript-first, fast dev server |
+| Components | Shadcn/ui | Copy-paste components (no runtime dependency), Tailwind-native, accessible, professional |
+| Styling | Tailwind CSS | Golden Path compatible, pairs with Shadcn, rapid iteration |
+| Map | Leaflet + OpenStreetMap | Free and open source, no API key or usage limits, sufficient for property visualization |
+| Data tables | TanStack Table | Headless, Shadcn-compatible, handles 100k+ rows with virtualization |
+| Charts | Recharts | React-native, simple API, good for run deltas and record count visualization |
+| Agent chat | Vercel AI SDK `useChat` | Golden Path mandated for LLM UIs, handles streaming and tool calls |
+
+### Layout
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  Top Bar: Logo + Status (IPNS health, last run)          │
+├────────────┬─────────────────────────────────────────────┤
+│  Sidebar   │  Content Area                               │
+│            │                                             │
+│  Dashboard │  [Selected page renders here]               │
+│  Runs      │                                             │
+│  Explorer  │                                             │
+│  Search    │                                             │
+│  Map       │                                             │
+│  Agent     │                                             │
+│  Artifacts │                                             │
+│            │                                             │
+└────────────┴─────────────────────────────────────────────┘
+```
+
+### Pages
+
+| Page | Purpose | Key Components |
+|------|---------|---------------|
+| **Dashboard** | Overview: total records, latest run, IPNS status, source health | Shadcn stat cards, Recharts mini charts, status badges |
+| **Pipeline Runs** | Chronological run history with deltas | TanStack Table with expandable rows (source details, limitations) |
+| **Data Explorer** | Browse properties by source, view provenance | Filterable TanStack Table, Shadcn sheet/drawer for property detail with provenance tree |
+| **Property Search** | 6 required query types + free-text filters | Shadcn filter bar (roof age, ownership tenure, water view, regional owner, transit, Starbucks), results table with source evidence |
+| **Map View** | Duval County properties on Leaflet map | Leaflet + OpenStreetMap tiles, marker clusters (react-leaflet + leaflet.markercluster), popup with property summary, filter integration |
+| **Agent Chat** | Natural-language Q&A with source-backed answers | Vercel AI SDK `useChat` with streaming, results rendered as Shadcn cards with source citations |
+| **IPFS Artifacts** | Published CIDs, IPNS pointers, delta history | Artifact list with CID links to Filebase gateway, delta summary per publish |
+
+### Map Specifics
+
+- **Center**: Jacksonville, FL (30.3322, -81.6557), zoom 11
+- **Tiles**: OpenStreetMap (`https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`)
+- **Markers**: Clustered via `leaflet.markercluster` for performance at scale (200k+ properties)
+- **Popups**: Property summary (parcel ID, address, assessed value, key signals)
+- **Layers**: Toggle overlays for water bodies (NHD), transit stops (GTFS), Starbucks locations (OSM)
+- **Filters**: Sidebar filters apply to both map markers and results table simultaneously
+
 ## Project Structure
 
 ### Documentation (this feature)
