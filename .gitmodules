@@ -1,0 +1,6 @@
+[submodule "oracle-property-intelligence-platform-pipeline-duval-fl"]
+	path = oracle-property-intelligence-platform-pipeline-duval-fl
+	url = git@github.com:prismteam-ai/oracle-property-intelligence-platform-pipeline-duval-fl.git
+[submodule "residential-jax-crm"]
+	path = residential-jax-crm
+	url = git@github.com:prismteam-ai/residential-jax-crm.git
