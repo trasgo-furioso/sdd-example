@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-20
 
-**Status**: Ready to Dev
+**Status**: In Progress
 
 **Input**: Parent roadmap: `specs/001-oracle-crm-integration/roadmap.md` → entry **R1**. Complete the Oracle pipeline by continuously and incrementally ingesting all available Duval County property, permit, ownership, business, contractor, location, and public-source data, reconciling duplicates, preserving source provenance, publishing full-snapshot artifacts with delta metadata to Elephant IPFS with stable IPNS pointers, sending webhook events to notify consumers, and maintaining a visible pipeline run history UI for the Oracle Operator.
 
