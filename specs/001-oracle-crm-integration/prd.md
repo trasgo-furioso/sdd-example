@@ -2,7 +2,7 @@
 
 **Created**: 2026-08-20
 **Discovery Session**: 2026-08-20
-**Status**: Opportunity
+**Status**: Planning
 
 ## Problem Statement
 
