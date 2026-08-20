@@ -14,11 +14,20 @@
 - Oracle Pipeline: `oracle-property-intelligence-platform-pipeline-duval-fl/` — owns data ingestion, reconciliation, and IPFS publishing
 - Residential CRM: `residential-jax-crm/` — owns search, criteria matching, notifications, and acquisition workflow
 
+## Clarifications
+
+### Session 2026-08-20
+
+- Q: How should the CRM detect new pipeline artifacts — polling or push? → A: Pipeline sends events to a CRM webhook after publishing.
+- Q: Does the pipeline publish the full dataset or only deltas? → A: Full snapshot as primary artifact, with delta metadata included for efficient CRM processing (per stakeholder: "re-publish updated artifacts" + "record deltas and timestamps").
+- Q: When IPNS resolution fails, should CRM block or degrade gracefully? → A: Continue with last loaded data, retry in background, surface staleness warning.
+- Q: When multiple pipeline runs publish rapidly, should CRM process every artifact or skip to latest? → A: Process every artifact sequentially to guarantee per-run notification granularity.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Pipeline Publishes, CRM Discovers (Priority: P1)
 
-The Oracle Operator completes a pipeline run that ingests new or changed Duval County property records. The pipeline reconciles duplicates, produces a versioned data artifact, and publishes it to Elephant IPFS with a stable IPNS pointer. The CRM detects the updated IPNS pointer, resolves the new artifact, and makes the updated records available for search and criteria matching — all without a hosted database.
+The Oracle Operator completes a pipeline run that ingests new or changed Duval County property records. The pipeline reconciles duplicates, produces a versioned data artifact (full snapshot with delta metadata), and publishes it to Elephant IPFS with a stable IPNS pointer. The pipeline then sends a webhook event to the CRM. The CRM resolves the new artifact and makes the updated records available for search and criteria matching — all without a hosted database.
 
 **Why this priority**: This is the foundational integration path. Without the pipeline publishing and the CRM consuming, nothing else works. It also proves the zero-Oracle-hosted-cost architecture.
 
@@ -27,7 +36,7 @@ The Oracle Operator completes a pipeline run that ingests new or changed Duval C
 **Acceptance Scenarios**:
 
 1. **Given** the pipeline has completed an incremental ingestion run with new records, **When** the pipeline publishes the updated artifact to Elephant IPFS, **Then** the published artifact has a new CID and the IPNS pointer is updated to reference it.
-2. **Given** a new IPNS-referenced artifact is available, **When** the CRM checks for updates, **Then** it resolves the new CID, loads the updated records, and they appear in search results.
+2. **Given** the pipeline has published and sent a webhook event to the CRM, **When** the CRM receives the event, **Then** it resolves the new CID from the IPNS pointer, loads the updated records, and they appear in search results.
 3. **Given** the pipeline has reconciled duplicate entities across sources, **When** the CRM loads the artifact, **Then** it receives deduplicated records with clear provenance attribution per source.
 4. **Given** the CRM is operating, **When** no hosted Oracle database is available, **Then** the CRM still functions by resolving data exclusively from Elephant IPFS via IPNS pointers and querying locally.
 
@@ -83,11 +92,11 @@ A CRM User asks the natural-language agent a property intelligence question (e.g
 
 ### Edge Cases
 
-- What happens when the IPNS pointer is updated but the CRM cannot resolve the new CID (network partition or gateway unavailability)?
-- How does the CRM handle a pipeline artifact that contains a schema change (new fields added or fields removed)?
-- What happens when the pipeline publishes a run with zero new records (no-op update)?
-- How does the system behave when duplicate records remain after reconciliation due to insufficient matching confidence?
-- What happens when multiple pipeline runs publish in rapid succession before the CRM has processed the previous update?
+- **IPNS resolution failure**: When the CRM receives a webhook but cannot resolve the new CID (network partition or gateway unavailability), it continues operating with the last successfully loaded data, retries resolution in the background, and surfaces a staleness warning to the user.
+- **Schema changes**: Out of scope for the initial milestone (see Assumptions). The CRM assumes a stable artifact schema.
+- **No-op pipeline update**: When the pipeline publishes a run with zero new records, the webhook fires, the CRM processes the artifact, finds no delta records matching any criteria, and generates no notifications.
+- **Low-confidence reconciliation**: When duplicate records remain after reconciliation due to insufficient matching confidence, the pipeline includes them as separate records with provenance; deduplication quality is a pipeline sub-spec concern.
+- **Rapid successive pipeline runs**: The CRM processes every artifact sequentially in the order webhook events are received, guaranteeing per-run notification granularity. No artifacts are skipped.
 
 ## Requirements *(mandatory)*
 
@@ -97,8 +106,10 @@ A CRM User asks the natural-language agent a property intelligence question (e.g
 - **FR-002**: The pipeline MUST include run metadata with each published artifact: run timestamp, source list, record counts, and deltas (new/updated/removed).
 - **FR-003**: The pipeline MUST reconcile duplicate entities across all ingested sources and preserve source provenance for every record.
 - **FR-004**: The CRM MUST resolve pipeline data exclusively via IPNS pointers without requiring a hosted database.
-- **FR-005**: The CRM MUST detect when the IPNS pointer references a new artifact and load updated records.
-- **FR-006**: The CRM MUST run saved criteria against newly loaded records and generate notifications for matches.
+- **FR-005**: The pipeline MUST send a webhook event to the CRM after publishing a new artifact, including the IPNS pointer and run identifier.
+- **FR-006**: The CRM MUST process webhook events sequentially in order of receipt, resolve the referenced artifact, and run saved criteria against delta records to generate notifications for matches.
+- **FR-012**: Each published artifact MUST be a full snapshot of all reconciled records, accompanied by delta metadata identifying new, updated, and removed records since the previous run.
+- **FR-013**: The CRM MUST continue operating with the last successfully loaded data when artifact resolution fails, retry in the background, and display a staleness warning to the user.
 - **FR-007**: Notifications MUST identify the matching property, the criteria that triggered the match, and the pipeline run that produced the data.
 - **FR-008**: Property records in the CRM MUST display source provenance (contributing sources, pipeline run reference, data timestamp).
 - **FR-009**: The natural-language agent MUST query the local data layer and return source-backed answers with provenance.
@@ -108,8 +119,9 @@ A CRM User asks the natural-language agent a property intelligence question (e.g
 ### Key Entities
 
 - **Pipeline Run**: A single execution of the ingestion pipeline; has a timestamp, source list, record counts, and a delta summary. Produces a published artifact.
-- **Published Artifact**: A content-addressed data package on Elephant IPFS; referenced by a stable IPNS pointer; contains reconciled property records and run metadata.
-- **IPNS Pointer**: A stable, resolvable name that always points to the latest published artifact CID. The contract between pipeline (publisher) and CRM (consumer).
+- **Published Artifact**: A content-addressed data package on Elephant IPFS; referenced by a stable IPNS pointer; contains a full snapshot of all reconciled property records, run metadata, and delta metadata (new/updated/removed records since previous run).
+- **IPNS Pointer**: A stable, resolvable name that always points to the latest published artifact CID. Part of the contract between pipeline (publisher) and CRM (consumer).
+- **Webhook Event**: A push notification sent by the pipeline to the CRM after publishing a new artifact; contains the IPNS pointer and run identifier. The signaling mechanism that triggers CRM processing.
 - **Property Record**: A reconciled entity representing a Duval County property with attributes from one or more sources; carries provenance metadata.
 - **Saved Criteria**: A CRM User's named set of property filters (geographic, attribute-based, distress signals) that runs against each new pipeline update.
 - **Notification**: An alert generated when a pipeline update produces records matching saved criteria; links to the property, the criteria, and the originating pipeline run.
@@ -134,4 +146,4 @@ A CRM User asks the natural-language agent a property intelligence question (e.g
 - Court data enrichment (foreclosure, lien, probate) is optional and does not affect the integration contract — it is an additive data source within the pipeline.
 - Outreach channels in the CRM remain mocked; the integration contract covers data flow, not downstream CRM actions.
 - Each sub-system (pipeline and CRM) will have its own independent spec-of-specs cycle; this parent spec governs only the integration touchpoints.
-- The IPNS pointer is the single integration contract point — the pipeline publishes to it, the CRM reads from it. No other coupling exists between the systems.
+- The integration contract has two touchpoints: (1) the IPNS pointer for data access (pipeline publishes, CRM reads), and (2) a webhook for event signaling (pipeline pushes, CRM receives). No other coupling exists between the systems.

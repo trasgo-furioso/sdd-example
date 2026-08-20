@@ -32,5 +32,5 @@
 ## Notes
 
 - This is a parent integration spec. Sub-system specs (pipeline and CRM) will be created as independent spec-of-specs.
-- The IPNS pointer is identified as the single contract point between systems.
+- The integration contract has two touchpoints: IPNS pointer (data) and webhook (signaling).
 - "Elephant IPFS" and "DuckDB" are referenced as domain concepts (part of the problem space), not implementation choices — they are stakeholder requirements.
