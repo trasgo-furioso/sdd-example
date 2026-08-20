@@ -135,6 +135,64 @@ oracle-property-intelligence-platform-pipeline-duval-fl/
 
 **Structure Decision**: Web application with separate backend (pipeline services), frontend (operator UI), agent, and MCP server — all TypeScript. The pipeline uses Restate for durable workflows following the oracle-node pattern. Infrastructure via CDK.
 
+## Kit Alignment
+
+### Builder Agent: Oracle
+
+The soofi-xyz-team-kit **Oracle agent** (`agents/oracle.md`) is the prescribed builder for this task. It orchestrates `elephant-xyz/skills` against the `oracle-node` pipeline. Reference implementation: Lee County, FL (~512k properties). Our Duval pipeline follows the same pattern, adapted for Duval County.
+
+**Routing confirmation**: Arceus (master router) routes property ingestion + IPFS publishing tasks to the Oracle agent.
+
+### Skills Driven
+
+The pipeline implementation drives these `elephant-xyz/skills` in sequence — each is a defined skill, not custom architecture:
+
+| Step | Skill | What It Does |
+|------|-------|-------------|
+| 1 | `bootstrap-oracle-infra` | Docker stack (Restate + Postgres), data dirs, services |
+| 2 | `county-discovery` | Catalog Duval appraiser/permit portals and sources |
+| 3 | `county-seed-data` | Generate parcel roll → `data/seeds/duval.csv` |
+| 4 | `county-appraisal-onboarding` | Browser flow, transform scripts, smoke test |
+| 5 | `validate-county-transform` | Validate 10-20 diverse parcels, 100% field coverage |
+| 6 | `county-permit-adapter` | Duval permit portal harvester |
+| 7 | `county-ingest-run` (pilot) | ~25 parcels end-to-end verification |
+| 8 | `county-ingest-run` (full) | Full county with backpressure feeder |
+| 9 | `sunbiz-corporate-ingest` | FL statewide corporate data |
+| 10 | `bbb-harvest` | Contractor reputation enrichment |
+| 11 | `query-db-loading-matching` | Reconcile + verify folio counts |
+| 12 | `county-open-data-publish` | Export + upload + IPNS (gated) |
+| 13 | `county-query-table-publish` | Parquet export + upload + IPNS + MCP wire |
+| 14 | `deploy-open-data-mcp` | Add Duval to MCP IPNS maps |
+
+### Kit Skills Used
+
+| Skill | Purpose |
+|-------|---------|
+| `use-oracle` | Primary — drives onboard-county + stage skills on oracle-node pipeline |
+| `apply-engineering-guidelines` | Golden Path baseline (TypeScript, CDK, Vercel AI SDK, PagerDuty, Powertools) |
+| `use-elephant-mcp` | Verify published data is queryable via MCP |
+| `use-elephant-query-db` | Pattern for Neon query DB consumption with Drizzle |
+
+### Extensions Beyond the Kit
+
+These capabilities are required by the spec but not covered by existing skills:
+
+| Extension | Why Needed | Implementation Approach |
+|-----------|-----------|------------------------|
+| Webhook signaling | CRM integration contract (R2) | Add webhook dispatch to Publish virtual object post-IPNS-update |
+| Delta metadata | CRM needs per-run change detection | Leverage Loader watermark diffs; publish `delta.json` alongside index |
+| Operator UI | Pipeline monitoring + demo requirement | React frontend wrapping Restate state + run history |
+| Proximity queries | 6 required query types (transit, Starbucks, water) | Pre-compute derived signals at ingestion from GTFS, OSM, NHD |
+| Natural-language agent | Stakeholder requirement for RAG-backed Q&A | Vercel AI SDK + DuckDB tool calling over published Parquet |
+
+### Supporting Agents
+
+| Agent | Role |
+|-------|------|
+| **Arceus** | Validates Oracle is the correct agent; confirms skill routing |
+| **Donphan** | Explores/verifies published MCP data post-publish |
+| **Metagross** | Reference for monorepo scaffolding pattern (Turborepo, Amplify, CDK) |
+
 ## Complexity Tracking
 
 No constitution violations to justify.
