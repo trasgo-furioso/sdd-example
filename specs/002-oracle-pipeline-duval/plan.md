@@ -68,8 +68,7 @@ No violations. No complexity tracking entries needed.
 │  ├── Postgres 16        (port 5432, EBS volume)     │
 │  └── Pipeline services  (port 9080, Node 22.18+)    │
 │                                                     │
-│  Nginx reverse proxy                                │
-│  └── HTTPS via Caddy/certbot                        │
+│  Caddy reverse proxy (auto-TLS)                     │
 │      ├── /api/*    → Pipeline services :9080        │
 │      ├── /mcp      → MCP endpoint :9090             │
 │      └── /restate  → Restate admin :9070            │
