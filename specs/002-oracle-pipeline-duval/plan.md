@@ -134,7 +134,7 @@ infra/lib/
 
 ## UX Architecture
 
-**Stack**: Vite + React + Shadcn/ui + Tailwind CSS + Leaflet + TanStack Table + Recharts + Vercel AI SDK `useChat`
+**Stack**: Vite + React + Shadcn/ui + Tailwind CSS + TanStack Table + Recharts + Vercel AI SDK `useChat`
 
 ### Technology Choices
 
@@ -143,10 +143,11 @@ infra/lib/
 | Build | Vite + React | Amplify-compatible static SPA, TypeScript-first, fast dev server |
 | Components | Shadcn/ui | Copy-paste components (no runtime dependency), Tailwind-native, accessible, professional |
 | Styling | Tailwind CSS | Golden Path compatible, pairs with Shadcn, rapid iteration |
-| Map | Leaflet + OpenStreetMap | Free and open source, no API key or usage limits, sufficient for property visualization |
 | Data tables | TanStack Table | Headless, Shadcn-compatible, handles 100k+ rows with virtualization |
 | Charts | Recharts | React-native, simple API, good for run deltas and record count visualization |
 | Agent chat | Vercel AI SDK `useChat` | Golden Path mandated for LLM UIs, handles streaming and tool calls |
+
+Note: Leaflet + OpenStreetMap map view is deferred to R2 (CRM). The pipeline demo does not require a map.
 
 ### Layout
 
@@ -158,35 +159,31 @@ infra/lib/
 │            │                                             │
 │  Dashboard │  [Selected page renders here]               │
 │  Runs      │                                             │
-│  Explorer  │                                             │
 │  Search    │                                             │
-│  Map       │                                             │
 │  Agent     │                                             │
 │  Artifacts │                                             │
 │            │                                             │
 └────────────┴─────────────────────────────────────────────┘
 ```
 
-### Pages
+### Pages (5)
 
 | Page | Purpose | Key Components |
 |------|---------|---------------|
 | **Dashboard** | Overview: total records, latest run, IPNS status, source health | Shadcn stat cards, Recharts mini charts, status badges |
 | **Pipeline Runs** | Chronological run history with deltas | TanStack Table with expandable rows (source details, limitations) |
-| **Data Explorer** | Browse properties by source, view provenance | Filterable TanStack Table, Shadcn sheet/drawer for property detail with provenance tree |
-| **Property Search** | 6 required query types + free-text filters | Shadcn filter bar (roof age, ownership tenure, water view, regional owner, transit, Starbucks), results table with source evidence |
-| **Map View** | Duval County properties on Leaflet map | Leaflet + OpenStreetMap tiles, marker clusters (react-leaflet + leaflet.markercluster), popup with property summary, filter integration |
+| **Property Search** | 6 required query types + browse-by-source + provenance | Shadcn filter bar (roof age, ownership tenure, water view, regional owner, transit, Starbucks), "Browse by Source" tab for data exploration, results table with source evidence, Shadcn sheet/drawer for property detail with provenance tree |
 | **Agent Chat** | Natural-language Q&A with source-backed answers | Vercel AI SDK `useChat` with streaming, results rendered as Shadcn cards with source citations |
-| **IPFS Artifacts** | Published CIDs, IPNS pointers, delta history | Artifact list with CID links to Filebase gateway, delta summary per publish |
+| **IPFS Artifacts** | Published CIDs, IPNS pointers, delta history, MCP-ready proof | Artifact list with CID links to Filebase gateway, delta summary per publish, MCP connection status |
 
-### Map Specifics
+### Demo Flow (maps to stakeholder transcript)
 
-- **Center**: Jacksonville, FL (30.3322, -81.6557), zoom 11
-- **Tiles**: OpenStreetMap (`https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`)
-- **Markers**: Clustered via `leaflet.markercluster` for performance at scale (200k+ properties)
-- **Popups**: Property summary (parcel ID, address, assessed value, key signals)
-- **Layers**: Toggle overlays for water bodies (NHD), transit stops (GTFS), Starbucks locations (OSM)
-- **Filters**: Sidebar filters apply to both map markers and results table simultaneously
+1. **Dashboard** → show overview, total records, source health
+2. **Pipeline Runs** → show run history with deltas, source limitations
+3. **Property Search** → run all 6 query types, show source provenance per result
+4. **Property Search** → "Browse by Source" tab, show records by source with provenance
+5. **Agent Chat** → ask 3 agent prompts, show source-backed evidence
+6. **IPFS Artifacts** → show CIDs, IPNS pointers, MCP-ready interface
 
 ## Project Structure
 
@@ -250,9 +247,10 @@ oracle-property-intelligence-platform-pipeline-duval-fl/
 │   │   ├── components/
 │   │   ├── pages/
 │   │   │   ├── dashboard.tsx
-│   │   │   ├── run-history.tsx
-│   │   │   ├── data-explorer.tsx
-│   │   │   └── query.tsx
+│   │   │   ├── pipeline-runs.tsx
+│   │   │   ├── property-search.tsx
+│   │   │   ├── agent-chat.tsx
+│   │   │   └── ipfs-artifacts.tsx
 │   │   └── services/
 │   └── tests/
 ├── agent/                    # Natural-language agent
