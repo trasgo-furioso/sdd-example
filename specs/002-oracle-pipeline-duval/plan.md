@@ -149,41 +149,307 @@ infra/lib/
 
 Note: Leaflet + OpenStreetMap map view is deferred to R2 (CRM). The pipeline demo does not require a map.
 
-### Layout
+### Shell Layout
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│  Top Bar: Logo + Status (IPNS health, last run)          │
-├────────────┬─────────────────────────────────────────────┤
-│  Sidebar   │  Content Area                               │
-│            │                                             │
-│  Dashboard │  [Selected page renders here]               │
-│  Runs      │                                             │
-│  Search    │                                             │
-│  Agent     │                                             │
-│  Artifacts │                                             │
-│            │                                             │
-└────────────┴─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ORACLE PIPELINE — DUVAL COUNTY                      [IPNS: ● Live]   │
+│                                                      Last run: 2m ago  │
+├──────────────┬──────────────────────────────────────────────────────────┤
+│              │                                                         │
+│  ┌────────┐  │                                                         │
+│  │ ◉ Dash │  │  [Content area — selected page renders here]            │
+│  │   board│  │                                                         │
+│  └────────┘  │                                                         │
+│  ┌────────┐  │                                                         │
+│  │  Pipe- │  │                                                         │
+│  │  line  │  │                                                         │
+│  │  Runs  │  │                                                         │
+│  └────────┘  │                                                         │
+│  ┌────────┐  │                                                         │
+│  │  Prop- │  │                                                         │
+│  │  erty  │  │                                                         │
+│  │  Search│  │                                                         │
+│  └────────┘  │                                                         │
+│  ┌────────┐  │                                                         │
+│  │  Agent │  │                                                         │
+│  │  Chat  │  │                                                         │
+│  └────────┘  │                                                         │
+│  ┌────────┐  │                                                         │
+│  │  IPFS  │  │                                                         │
+│  │  Arti- │  │                                                         │
+│  │  facts │  │                                                         │
+│  └────────┘  │                                                         │
+│              │                                                         │
+│  ──────────  │                                                         │
+│  Duval, FL   │                                                         │
+│  245,012 rec │                                                         │
+│  6 sources   │                                                         │
+│              │                                                         │
+└──────────────┴──────────────────────────────────────────────────────────┘
 ```
 
-### Pages (5)
+Sidebar: fixed 200px width, collapsible to icons. Bottom section shows county summary stats.
+Top bar: app title left, IPNS health indicator + last run time right.
 
-| Page | Purpose | Key Components |
-|------|---------|---------------|
-| **Dashboard** | Overview: total records, latest run, IPNS status, source health | Shadcn stat cards, Recharts mini charts, status badges |
-| **Pipeline Runs** | Chronological run history with deltas | TanStack Table with expandable rows (source details, limitations) |
-| **Property Search** | 6 required query types + browse-by-source + provenance | Shadcn filter bar (roof age, ownership tenure, water view, regional owner, transit, Starbucks), "Browse by Source" tab for data exploration, results table with source evidence, Shadcn sheet/drawer for property detail with provenance tree |
-| **Agent Chat** | Natural-language Q&A with source-backed answers | Vercel AI SDK `useChat` with streaming, results rendered as Shadcn cards with source citations |
-| **IPFS Artifacts** | Published CIDs, IPNS pointers, delta history, MCP-ready proof | Artifact list with CID links to Filebase gateway, delta summary per publish, MCP connection status |
+### Page 1: Dashboard
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Dashboard                                                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌────────┐ │
+│  │ Total Props  │ │ Last Run     │ │ IPNS Status  │ │ Sources│ │
+│  │              │ │              │ │              │ │        │ │
+│  │   245,012    │ │ 2m ago       │ │   ● Live     │ │  6/6   │ │
+│  │   +142 new   │ │ +142 / ~38   │ │ CID: bafy... │ │ healthy│ │
+│  └──────────────┘ └──────────────┘ └──────────────┘ └────────┘ │
+│                                                                 │
+│  ┌────────────────────────────────┐ ┌──────────────────────────┐│
+│  │ Records Over Time (Recharts)  │ │ Records by Source        ││
+│  │                               │ │                          ││
+│  │   250k ┤          ___/        │ │  Appraiser   ████████ 85k││
+│  │   200k ┤       __/           │ │  Permits     ██████   62k││
+│  │   150k ┤    __/              │ │  Ownership   █████    48k││
+│  │   100k ┤  _/                 │ │  Business    ███      28k││
+│  │    50k ┤_/                   │ │  Contractor  ██       15k││
+│  │        └──────────────       │ │  Geo/Coords  █████    47k││
+│  │         Run 1  2  3  4  5    │ │                          ││
+│  └────────────────────────────────┘ └──────────────────────────┘│
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │ Recent Pipeline Runs (last 5)                               ││
+│  │                                                             ││
+│  │  Run    │ Timestamp        │ New  │ Updated │ Status        ││
+│  │  ───────┼──────────────────┼──────┼─────────┼────────       ││
+│  │  #005   │ Aug 20, 14:30    │ 142  │ 38      │ ● Success    ││
+│  │  #004   │ Aug 20, 10:15    │ 87   │ 12      │ ● Success    ││
+│  │  #003   │ Aug 19, 22:00    │ 0    │ 5       │ ● Success    ││
+│  │  #002   │ Aug 19, 14:30    │ 1204 │ 340     │ ◐ Partial    ││
+│  │  #001   │ Aug 18, 09:00    │ 243k │ 0       │ ● Success    ││
+│  │                                                [View All →] ││
+│  └──────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Page 2: Pipeline Runs
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Pipeline Runs                                  [Trigger Run ▶] │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │ Run    │ Timestamp        │ New   │ Upd  │ Rem │ Status     ││
+│  │ ───────┼──────────────────┼───────┼──────┼─────┼─────────── ││
+│  │ ▶ #005 │ Aug 20, 14:30    │ 142   │ 38   │ 0   │ ● Success ││
+│  │ ┌──────────────────────────────────────────────────────────┐ ││
+│  │ │ Sources Ingested:                                       │ ││
+│  │ │  ● Appraiser  12,340 rec  0.8s avg    ── no issues      │ ││
+│  │ │  ● Permits     8,210 rec  1.2s avg    ── no issues      │ ││
+│  │ │  ● Ownership   6,100 rec  0.5s avg    ── no issues      │ ││
+│  │ │  ● Business    3,400 rec  0.9s avg    ── no issues      │ ││
+│  │ │  ● Contractor  1,200 rec  3.1s avg    ⚠ slow source    │ ││
+│  │ │  ● Geo/Coords  9,800 rec  0.3s avg    ── no issues      │ ││
+│  │ │                                                         │ ││
+│  │ │ Published Artifact:                                     │ ││
+│  │ │  CID: bafybeig...7x2a    IPNS: k51qzi...d8f            │ ││
+│  │ │  Webhook: ● Delivered to 1 consumer (204, 0.3s)         │ ││
+│  │ │                                                         │ ││
+│  │ │ Limitations:                                            │ ││
+│  │ │  ⚠ Contractor source averaged 3.1s/request (rate limit)│ ││
+│  │ └──────────────────────────────────────────────────────────┘ ││
+│  │   #004 │ Aug 20, 10:15    │ 87    │ 12   │ 0   │ ● Success ││
+│  │   #003 │ Aug 19, 22:00    │ 0     │ 5    │ 0   │ ● Success ││
+│  │   #002 │ Aug 19, 14:30    │ 1204  │ 340  │ 2   │ ◐ Partial ││
+│  │   #001 │ Aug 18, 09:00    │ 243k  │ 0    │ 0   │ ● Success ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  Showing 5 of 5 runs                              [1] [2] [>]  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+Expandable rows: click ▶ to expand run details (sources, artifact, webhook, limitations).
+
+### Page 3: Property Search
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Property Search                                                │
+│                                                                 │
+│  [Search by Filters]  [Browse by Source]           ← tab bar    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌── Filter Bar ───────────────────────────────────────────────┐│
+│  │ Roof Age:  [> 15 yrs ▼]   Ownership:  [> 10 yrs ▼]        ││
+│  │ Water:     [☐ Near water]  Owner Type: [☐ Regional]         ││
+│  │ Transit:   [☐ Walking dist] Starbucks: [☐ Walking dist]    ││
+│  │ Free text: [________________________]     [Search 🔍]       ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  245 results                                    [Export CSV ↓]  │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │ Parcel ID  │ Address          │ Value   │ Roof │ Own. │ Src ││
+│  │ ───────────┼──────────────────┼─────────┼──────┼──────┼──── ││
+│  │ RE0001234  │ 123 Main St      │ $185k   │ 18yr │ 12yr │ 3  ││
+│  │ RE0005678  │ 456 Oak Ave      │ $220k   │ 22yr │ 15yr │ 2  ││
+│  │ RE0009012  │ 789 Pine Rd      │ $142k   │ 16yr │ 8yr  │ 4  ││
+│  │ RE0003456  │ 321 Elm Blvd     │ $310k   │ 20yr │ 20yr │ 3  ││
+│  │ ...                                                         ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  ┌── Property Detail Drawer (slide-in from right) ────────────┐ │
+│  │                                                    [✕]     │ │
+│  │  RE0001234 — 123 Main St, Jacksonville, FL 32202           │ │
+│  │                                                            │ │
+│  │  Assessed Value: $185,000    Market Value: $195,000        │ │
+│  │  Year Built: 2008            Sqft: 1,800                   │ │
+│  │  Roof Age: 18 years          Last Sale: 2012-03-15         │ │
+│  │  Owner: Smith, John          Regional: No (local)          │ │
+│  │  Water Proximity: 1,200 ft   Transit: 0.3 mi ● walking    │ │
+│  │  Starbucks: 0.8 mi           Coordinates: 30.33, -81.65   │ │
+│  │                                                            │ │
+│  │  ── Source Provenance ──────────────────────────────────    │ │
+│  │  ● duval-appraiser   collected Aug 20, 10:00   Run #005   │ │
+│  │  ● duval-permits     collected Aug 20, 10:05   Run #005   │ │
+│  │  ● duval-ownership   collected Aug 19, 22:00   Run #003   │ │
+│  │  Reconciliation confidence: 0.98                           │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Browse by Source tab**:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Property Search                                                │
+│                                                                 │
+│  [Search by Filters]  [Browse by Source]           ← tab bar    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌── Source Selector ──────────────────────────────────────────┐│
+│  │ [All Sources ▼]  Showing: duval-appraiser (85,210 records) ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │ Parcel ID  │ Address          │ Value   │ Collected  │ Run  ││
+│  │ ───────────┼──────────────────┼─────────┼────────────┼───── ││
+│  │ RE0001234  │ 123 Main St      │ $185k   │ Aug 20     │ #005 ││
+│  │ RE0005678  │ 456 Oak Ave      │ $220k   │ Aug 20     │ #005 ││
+│  │ RE0009012  │ 789 Pine Rd      │ $142k   │ Aug 19     │ #003 ││
+│  │ ...                                                         ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  Page 1 of 852                                     [1] [2] [>]  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+Clicking a row opens the same property detail drawer.
+
+### Page 4: Agent Chat
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Agent Chat                                                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │                                                             ││
+│  │  ┌─ You ──────────────────────────────────────────────────┐ ││
+│  │  │ Which properties have roofs older than 15 years and    │ ││
+│  │  │ have not exchanged ownership in more than 10 years?    │ ││
+│  │  └────────────────────────────────────────────────────────┘ ││
+│  │                                                             ││
+│  │  ┌─ Agent ────────────────────────────────────────────────┐ ││
+│  │  │ I found 1,247 properties matching both criteria.       │ ││
+│  │  │ Here are the top results:                              │ ││
+│  │  │                                                        │ ││
+│  │  │ ┌─ Result ──────────────────────────────────────────┐  │ ││
+│  │  │ │ RE0001234 — 123 Main St                           │  │ ││
+│  │  │ │ Roof: 18 yrs (permit 2008) │ Ownership: 12 yrs   │  │ ││
+│  │  │ │ Source: duval-appraiser, duval-permits │ Run #005  │  │ ││
+│  │  │ └──────────────────────────────────────────────────┘  │ ││
+│  │  │ ┌─ Result ──────────────────────────────────────────┐  │ ││
+│  │  │ │ RE0005678 — 456 Oak Ave                           │  │ ││
+│  │  │ │ Roof: 22 yrs (permit 2004) │ Ownership: 15 yrs   │  │ ││
+│  │  │ │ Source: duval-appraiser, duval-permits │ Run #005  │  │ ││
+│  │  │ └──────────────────────────────────────────────────┘  │ ││
+│  │  │                                                        │ ││
+│  │  │ Query executed: SELECT * FROM properties               │ ││
+│  │  │ WHERE roof_age_years > 15                              │ ││
+│  │  │ AND ownership_tenure_years > 10                        │ ││
+│  │  │                                                        │ ││
+│  │  │ Data source: Published Parquet via DuckDB              │ ││
+│  │  │ Last updated: Run #005 (Aug 20, 14:30)                 │ ││
+│  │  └────────────────────────────────────────────────────────┘ ││
+│  │                                                             ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  ┌──────────────────────────────────────────────────── ┌──────┐ │
+│  │ Ask about Duval County properties...                │ Send │ │
+│  └──────────────────────────────────────────────────── └──────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+Agent responses show: answer text, result cards with source provenance, the DuckDB query executed, and data freshness.
+
+### Page 5: IPFS Artifacts
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  IPFS Artifacts                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌── IPNS Pointers (Live) ─────────────────────────────────────┐│
+│  │                                                             ││
+│  │  Open Data    oracle-open-data-duval                        ││
+│  │  IPNS Key:    k51qzi5uqu5d...8f         ● Resolving        ││
+│  │  Current CID: bafybeig...7x2a           [Open in Gateway ↗]││
+│  │  Properties:  245,012                                       ││
+│  │  Published:   Aug 20, 14:31                                 ││
+│  │                                                             ││
+│  │  Query Table  oracle-query-table-duval                      ││
+│  │  IPNS Key:    k51qzi5uqu5d...3a         ● Resolving        ││
+│  │  Current CID: bafybeif...9b1c           [Open in Gateway ↗]││
+│  │  Format:      Parquet (DuckDB-ready)                        ││
+│  │  Published:   Aug 20, 14:32                                 ││
+│  │                                                             ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  ┌── MCP Status ───────────────────────────────────────────────┐│
+│  │                                                             ││
+│  │  Endpoint:    https://<host>/mcp          ● Connected       ││
+│  │  Tools:       listOracleProperties, queryProperties,        ││
+│  │               getOracleProperty, getPropertyQuerySchema     ││
+│  │  Config:      ORACLE_OPEN_DATA_IPNS_MAP={"duval":"k51..."}  ││
+│  │                                          [Test Query ▶]     ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  ┌── Publish History ──────────────────────────────────────────┐│
+│  │                                                             ││
+│  │  Run   │ Published       │ CID            │ Delta           ││
+│  │  ──────┼─────────────────┼────────────────┼──────────────── ││
+│  │  #005  │ Aug 20, 14:31   │ bafybeig...7x2 │ +142 ~38 -0    ││
+│  │  #004  │ Aug 20, 10:16   │ bafybeig...4a1 │ +87  ~12 -0    ││
+│  │  #003  │ Aug 19, 22:01   │ bafybeif...c3e │ +0   ~5  -0    ││
+│  │  #002  │ Aug 19, 14:31   │ bafybeif...8d2 │ +1204 ~340 -2  ││
+│  │  #001  │ Aug 18, 09:02   │ bafybeig...1f0 │ +243k ~0  -0   ││
+│  │                                                             ││
+│  │  All CIDs are CIDv1 (raw codec, SHA-256)                   ││
+│  │  All artifacts follow Elephant/Lexicon conventions          ││
+│  └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ### Demo Flow (maps to stakeholder transcript)
 
 1. **Dashboard** → show overview, total records, source health
-2. **Pipeline Runs** → show run history with deltas, source limitations
-3. **Property Search** → run all 6 query types, show source provenance per result
-4. **Property Search** → "Browse by Source" tab, show records by source with provenance
-5. **Agent Chat** → ask 3 agent prompts, show source-backed evidence
-6. **IPFS Artifacts** → show CIDs, IPNS pointers, MCP-ready interface
+2. **Pipeline Runs** → show run history with deltas, expand a run to show source details and limitations
+3. **Property Search** → run all 6 query types, click a result to show provenance in detail drawer
+4. **Property Search** → "Browse by Source" tab, show records by source with collection timestamps
+5. **Agent Chat** → ask 3 agent prompts, show source-backed evidence with query transparency
+6. **IPFS Artifacts** → show live IPNS pointers, CIDs, MCP status, publish history with deltas
 
 ## Project Structure
 
