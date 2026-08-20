@@ -4,9 +4,9 @@
 
 ## Deployment Strategy
 
-- **Decision**: AWS Amplify for frontend hosting + EC2/ECS for pipeline backend (Restate + Postgres)
-- **Rationale**: Slowking evaluator requires a deployed hosted runtime exercisable via Playwright. Amplify provides zero-config frontend hosting with CDK integration. Pipeline services need persistent Docker containers (Restate + Postgres) which require EC2/ECS. Alternative: Restate Cloud if available.
-- **Alternatives considered**: Vercel (frontend only, no Docker support for backend); Railway (no CDK integration); Fly.io (not AWS, violates Golden Path)
+- **Decision**: EC2 (t3.large, us-east-2) running Docker Compose (Restate + Postgres + pipeline services) with Nginx/HTTPS + Amplify for React frontend + Lambda for agent/MCP
+- **Rationale**: Slowking evaluator requires a deployed hosted runtime exercisable via Playwright. EC2 + Docker Compose mirrors the oracle-node pattern exactly (kit conformance). Amplify provides zero-config frontend hosting with CDK. Lambda for stateless agent/MCP endpoints. Single `npx cdk deploy --all` creates everything. Cost: ~$25-50/mo.
+- **Alternatives considered**: ECS Fargate (more complex CDK, Restate persistent state harder to manage); Vercel (frontend only, no Docker); Railway (no CDK); Restate Cloud (may not be available, adds dependency)
 
 ## Pipeline Architecture
 

@@ -23,14 +23,14 @@ Build a continuous/incremental property data pipeline for Duval County, FL that 
 - AWS CDK for infrastructure
 
 **Storage**:
-- Postgres 16 (pipeline query DB, local Docker or hosted)
+- Postgres 16 (pipeline query DB, Docker on EC2)
 - DuckDB (analytical queries over Parquet, in-process)
 - Filebase (S3-compatible IPFS pinning + IPNS management)
 - Per-county buckets: `elephant-oracle-open-data-duval`, `elephant-oracle-query-table-duval`
 
 **Testing**: Vitest (TypeScript), GitHub Actions CI
 
-**Target Platform**: Hosted web application (AWS Amplify or Vercel for UI; Restate Cloud or EC2 for pipeline services)
+**Target Platform**: EC2 (t3.large, us-east-2) for pipeline backend + Amplify for frontend + Lambda for agent/MCP
 
 **Project Type**: Web application (pipeline backend + operator UI frontend)
 
@@ -52,6 +52,85 @@ Build a continuous/incremental property data pipeline for Duval County, FL that 
 | IV. Realistic Data Scale | PASS | Targeting full Duval County parcel roll (200k-400k properties). Toy datasets rejected. |
 
 No violations. No complexity tracking entries needed.
+
+## Deployment Architecture
+
+**Approach**: EC2 + Docker Compose (mirrors oracle-node pattern) + Amplify + Lambda
+
+### Infrastructure Components
+
+```
+┌─────────────────────────────────────────────────────┐
+│  EC2 (t3.large, us-east-2)                          │
+│                                                     │
+│  Docker Compose                                     │
+│  ├── Restate 1.7        (ports 8080, 9070)          │
+│  ├── Postgres 16        (port 5432, EBS volume)     │
+│  └── Pipeline services  (port 9080, Node 22.18+)    │
+│                                                     │
+│  Nginx reverse proxy                                │
+│  └── HTTPS via Caddy/certbot                        │
+│      ├── /api/*    → Pipeline services :9080        │
+│      ├── /mcp      → MCP endpoint :9090             │
+│      └── /restate  → Restate admin :9070            │
+│                                                     │
+│  Security group: 443 (HTTPS), 22 (SSH)              │
+│  EBS volume: 100GB gp3 (pipeline data + Postgres)   │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│  Amplify (CDK-deployed)                             │
+│  └── React frontend (static site)                   │
+│      ├── Dashboard, run history, data explorer      │
+│      ├── Property query UI                          │
+│      └── Agent chat interface                       │
+│      API calls → EC2 HTTPS /api/*                   │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│  Lambda + API Gateway (CDK-deployed)                │
+│  ├── Agent function (Vercel AI SDK + DuckDB)        │
+│  │   └── Queries published Parquet via httpfs        │
+│  └── MCP function (stateless, reads IPNS)           │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│  Filebase (external, S3-compatible)                 │
+│  ├── elephant-oracle-open-data-duval    (IPFS)      │
+│  ├── elephant-oracle-query-table-duval  (IPFS)      │
+│  └── IPNS pointers (stable, per-county)             │
+└─────────────────────────────────────────────────────┘
+```
+
+### CDK Stacks
+
+```
+infra/lib/
+├── pipeline-stack.ts     # EC2 instance, security group, EBS volume,
+│                         # IAM role, user-data script (docker compose up)
+├── frontend-stack.ts     # Amplify app, branch auto-deploy, custom domain
+└── agent-stack.ts        # Lambda functions, API Gateway, IAM for DuckDB httpfs
+```
+
+### Deployment Flow
+
+1. **`npx cdk deploy PipelineStack`** — provisions EC2 with Docker Compose user-data. On first boot: pulls images, starts Restate + Postgres + pipeline services, configures Nginx + HTTPS.
+2. **`npx cdk deploy FrontendStack`** — creates Amplify app connected to repo. Auto-builds and deploys React frontend on push.
+3. **`npx cdk deploy AgentStack`** — deploys Lambda functions behind API Gateway for agent and MCP endpoints.
+
+### Why EC2 + Docker Compose
+
+- **Fidelity**: Identical to the oracle-node pattern from elephant-xyz/skills (Docker Compose with Restate + Postgres)
+- **Speed**: One CDK stack, one instance, everything running in minutes
+- **Cost**: ~$25-50/mo for t3.large — our cost, not Oracle's
+- **Simplicity**: No ECS/Fargate complexity for Restate persistent state
+- **Deployment-first**: Infrastructure is the FIRST task, unblocking all other work
+
+### Persistence
+
+- **Postgres data**: EBS volume mounted at `/data/postgres`, survives instance restarts
+- **Restate state**: EBS volume mounted at `/data/restate`, durable workflow journals persist
+- **Pipeline artifacts**: Local staging on EBS at `/data/pipeline`, published to Filebase IPFS
 
 ## Project Structure
 
