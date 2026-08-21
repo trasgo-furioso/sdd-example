@@ -98,6 +98,26 @@ The system exposes the data through an MCP-compatible interface that can resolve
 
 ---
 
+### User Story 6 - Acceptance Validation & Demo Recording (Priority: P6)
+
+As a validator, I want to collect proof that the system works by running automated Playwright tests that exercise the acceptance criteria of all implemented user stories, recording video evidence of each test as demo artifacts.
+
+**Why this priority**: This is the final validation gate. Tests prove all user stories work against the deployed runtime. Recorded videos serve as the demo artifact for stakeholder review.
+
+**Independent Test**: Run the Playwright test suite against the deployed frontend. All tests pass. Videos are saved as demo artifacts.
+
+**Acceptance Scenarios**:
+
+1. **Given** the deployed frontend is accessible, **When** the Dashboard page loads, **Then** it displays stat cards (Total Properties > 0, Last Run with timestamp, Sources count), a Records by Source table with entries, and IPFS/MCP status section showing the IPNS pointer.
+2. **Given** pipeline runs have completed, **When** the Pipeline Runs page loads, **Then** it shows a chronological table of runs with status badges, and the Trigger Run button is visible.
+3. **Given** the Trigger Run button is clicked, **When** the pipeline run completes, **Then** the runs table updates with a new entry showing status "Success" and non-zero delta counts.
+4. **Given** property data is loaded, **When** each of the 6 query types is selected on the Property Search page, **Then** results appear in the table with parcel IDs, addresses, values, and adaptive signal columns.
+5. **Given** the Agent Chat page is open, **When** the user sends "How many properties are in the database?", **Then** the agent responds with a count and source provenance within 30 seconds.
+6. **Given** the Agent Chat page is open, **When** the user sends "Which properties have roofs older than 15 years?", **Then** the agent responds with matching properties and cites source data.
+7. **Given** all tests pass, **When** the test suite completes, **Then** video recordings exist for each test as demo artifacts in the `e2e/videos/` directory.
+
+---
+
 ### Edge Cases
 
 - **Source unavailability**: When a Duval County data source is temporarily unavailable during a pipeline run, the pipeline completes with the available sources and documents the limitation in the run record.

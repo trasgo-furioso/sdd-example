@@ -179,6 +179,19 @@
 
 ---
 
+## Phase 9: E2E Validation & Demo Recording
+
+**Purpose**: Playwright tests exercising all user stories against the deployed runtime. Video recording serves as demo artifact.
+
+- [ ] T072 [E2E] Set up Playwright in delivery repo — create `e2e/` directory with `playwright.config.ts`, install `@playwright/test`, configure video recording (on for all tests), set baseURL to `https://d5sfa8vgu8mcx.cloudfront.net`, create npm scripts `test:e2e` and `test:e2e:headed`
+- [ ] T073 [E2E] Dashboard validation test (`e2e/tests/dashboard.spec.ts`) — verify stat cards render with data (Total Properties > 0, Last Run timestamp, Sources count > 0), Records by Source table has rows, IPFS section shows IPNS pointer
+- [ ] T074 [E2E] Pipeline Runs validation test (`e2e/tests/pipeline-runs.spec.ts`) — verify runs table has entries with status badges, Trigger Run button exists. Trigger a new run, wait for completion (poll /api/runs), verify new row appears with "Success" status
+- [ ] T075 [E2E] Property Search validation test (`e2e/tests/property-search.spec.ts`) — iterate all 6 query types (roof_age_gt_15, water_view, ownership_tenure_gt_10, regional_owners, transit_walking, starbucks_walking), select each from dropdown, verify results table shows rows with parcel IDs
+- [ ] T076 [E2E] Agent Chat validation test (`e2e/tests/agent-chat.spec.ts`) — send "How many properties are in the database?", wait for agent response (up to 30s), verify response contains a number. Send "Which properties have roofs older than 15 years?", verify response mentions properties
+- [ ] T077 [E2E] Run full e2e suite with video recording against deployed runtime, verify all tests pass, collect video artifacts from `e2e/videos/`
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -191,6 +204,7 @@
 - **Phase 6 (US4)**: Depends on Phase 3 (property data to query). Can start in parallel with Phase 4/5.
 - **Phase 7 (US5)**: Depends on Phase 4 (published IPFS artifacts to resolve).
 - **Phase 8 (Polish)**: Depends on all user stories being functional.
+- **Phase 9 (E2E Validation)**: Depends on all user stories deployed and accessible at production URL.
 
 ### Parallel Opportunities
 
