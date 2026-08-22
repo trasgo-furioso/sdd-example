@@ -237,3 +237,23 @@ UI can branch off after US1: US1 -> US3 (Dashboard/Runs UI) and US1 -> US4 (Prop
 | 12 | county-open-data-publish | T040 |
 | 13 | county-query-table-publish | T041 |
 | 14 | deploy-open-data-mcp | T061-T064 |
+
+---
+
+## Phase 10: Convergence
+
+**Purpose**: Address gaps identified by speckit-converge analysis. Aligns implementation with spec requirements that are partial or missing.
+
+**Converge date**: 2026-08-22
+
+- [ ] T078 [CONVERGE] Update task checkboxes in this file — mark T029-T045, T046-T060, T061-T064, T065-T068, T069, T072-T076 as `[x]` based on file existence and substantive implementation confirmed during convergence audit. Do NOT change any task descriptions.
+- [ ] T079 [CONVERGE] Integrate AWS Powertools structured logging — replace custom LogLevel/LogEntry in `oracle-property-intelligence-platform-pipeline-duval-fl/pipeline/src/lib/observability.ts` with `@aws-lambda-powertools/logger` Logger class (FR-015, plan.md Golden Path). Add `@aws-lambda-powertools/logger` to pipeline/package.json dependencies. Replace `console.info`/`console.error` calls in county-ingest.ts, ingest-chunk.ts, publish.ts, webhook.ts with structured Logger instance.
+- [ ] T080 [CONVERGE] Add agent response time assertion — create `oracle-property-intelligence-platform-pipeline-duval-fl/agent/tests/performance.test.ts` that sends a multi-attribute query to the agent and asserts response completes in under 10 seconds (SC-007). Use Vitest with extended timeout.
+- [ ] T081 [CONVERGE] Add webhook delivery timing assertion — create `oracle-property-intelligence-platform-pipeline-duval-fl/pipeline/tests/unit/webhook-timing.test.ts` that verifies webhook delivery completes within 30 seconds of artifact publication (SC-008). Mock the HTTP endpoint to return 200 after 1s, assert total time < 30s.
+- [ ] T082 [CONVERGE] Add reconciliation ambiguity guard — update `oracle-property-intelligence-platform-pipeline-duval-fl/pipeline/src/services/parcel.ts` to preserve both records separately (under distinct UUIDs with provenance) when reconciliation_confidence < 0.5, instead of merging (Edge-5 from spec.md).
+- [ ] T083 [CONVERGE] Add data gap annotation to proximity queries — update `oracle-property-intelligence-platform-pipeline-duval-fl/pipeline/src/api/query-routes.ts` to include a `data_gaps` field in the search response when properties are excluded due to missing coordinates or place data (Edge-6 from spec.md). Add note like "N properties excluded due to missing coordinate/proximity data".
+- [ ] T084 [CONVERGE] Run full e2e suite against deployed runtime — execute `npx playwright test` in `oracle-property-intelligence-platform-pipeline-duval-fl/e2e/` against `https://d5sfa8vgu8mcx.cloudfront.net`. Verify all 4 spec files pass (dashboard, pipeline-runs, property-search, agent-chat). Collect video artifacts in `e2e/videos/` (US6-7).
+- [ ] T085 [CONVERGE] Verify SC-001 two-run proof — trigger 2 pipeline runs via POST /api/runs/trigger with a gap between them. Verify second run shows incremental deltas (not re-ingesting all records). Screenshot or log evidence confirming delta_new < total_records on second run.
+- [ ] T086 [CONVERGE] Verify SC-004 IPNS resolvability — curl `https://ipfs.filebase.io/ipns/<key>/index.json` and confirm it returns valid JSON with county, property_count, shard_count. Confirm CID follows CIDv1+SHA-256 convention.
+
+**Checkpoint**: All convergence gaps addressed. Task checkboxes accurate. Performance criteria have test coverage. Edge cases handled. E2E validated with video artifacts.
